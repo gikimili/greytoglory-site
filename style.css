@@ -149,3 +149,9 @@ details p { padding: 0 0 1.2rem; }
 /* The hobby first: the half-grey, half-painted knight, as in the icon. */
 .hero-photo { display: block; justify-self: center; width: min(100%, 26rem); height: auto; border-radius: 1.4rem; box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.55); }
 @media (min-width: 64rem) { .home .hero-photo { width: min(100%, 30rem); } }
+
+/* The promo film between the hero and the feature rows: 16:9, or 9:16 on a phone. */
+.promo { margin: clamp(2.5rem, 6vw, 4.5rem) 0 0; }
+.promo video { display: block; width: 100%; height: auto; border-radius: 1.4rem; background: #0c414a; box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.55); }
+@media (max-width: 47.99rem) { .promo video { width: min(100%, 24rem); margin-inline: auto; } }
+.promo + .row { margin-top: clamp(2.5rem, 6vw, 4rem); }
