@@ -128,3 +128,7 @@ details p { padding: 0 0 1.2rem; }
   .row { grid-template-columns: 1fr 1fr; gap: 4rem; }
   .row:nth-of-type(even) .row-text { order: 2; }
 }
+
+/* The header (name and languages) stays on screen while scrolling. */
+.site-header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--paper) 88%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.language-section, .row { scroll-margin-top: 5rem; }
