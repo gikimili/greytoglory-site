@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Un schéma de couleurs de figurine partagé avec Learn2Paint.">
+  <meta name="theme-color" content="#02555D" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#142022" media="(prefers-color-scheme: dark)">
+  <link rel="icon" type="image/png" href="logo.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css"><title>Schéma partagé — Learn2Paint</title>
+  <style>
+    .scheme-zones { list-style: none; padding: 0; margin: 1.2rem 0; display: grid; gap: 0.7rem; }
+    .scheme-zones li { display: flex; align-items: center; gap: 0.8rem; font-weight: 650; }
+    .scheme-swatch { width: 2.2rem; height: 2.2rem; border-radius: 0.6rem; border: 1px solid rgba(0,0,0,0.12); flex: none; }
+    .scheme-actions { display: grid; gap: 0.7rem; margin-top: 1.4rem; }
+    .scheme-actions .button, .scheme-actions .store-badge { width: 100%; }
+    .scheme-author { color: var(--muted, #6b6f6a); margin-top: 0.4rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><img class="brand-mark brand-icon" src="logo.png" width="32" height="32" alt="">Learn2Paint</a></div></header>
+  <main class="page-shell">
+    <section class="prose-section" aria-live="polite">
+      <h1 id="title"></h1>
+      <p class="scheme-author" id="author"></p>
+      <ul class="scheme-zones" id="zones"></ul>
+      <p id="intro"></p>
+      <div class="scheme-actions">
+        <a class="button" id="open" href="#"></a>
+        <a class="store-badge" id="store" href="https://apps.apple.com/app/id6813079347"></a>
+        <span class="store-badge store-badge-soon" id="android"></span>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="site-footer-inner"><p>© Learn2Paint</p><nav class="footer-nav"><a href="index.html">Learn2Paint</a><a href="privacy.html">Confidentialité / Privacy</a></nav></div></footer>
+  <script>
+  // The scheme travels in the fragment (never sent to this server): deflate-raw + base64url, same format as SchemeLink.swift.
+  const T = {
+    fr: { title: "Schéma partagé", by: "Schéma de ", bad: "Ce lien ne contient pas de schéma lisible.", intro: "Ouvre ce schéma dans Grey to Glory : chaque ton est adapté à tes propres pots.", open: "Ouvrir dans Grey to Glory", store: "Télécharger sur l’App Store", android: "Android · bientôt" },
+    en: { title: "Shared scheme", by: "Scheme by ", bad: "This link holds no readable scheme.", intro: "Open this scheme in Grey to Glory: every tone is matched to your own pots.", open: "Open in Grey to Glory", store: "Download on the App Store", android: "Android · coming soon" },
+    es: { title: "Esquema compartido", by: "Esquema de ", bad: "Este enlace no contiene un esquema legible.", intro: "Abre este esquema en Grey to Glory: cada tono se adapta a tus propios botes.", open: "Abrir en Grey to Glory", store: "Descargar en el App Store", android: "Android · próximamente" },
+    de: { title: "Geteiltes Schema", by: "Schema von ", bad: "Dieser Link enthält kein lesbares Schema.", intro: "Öffne dieses Schema in Grey to Glory: Jeder Ton wird an deine eigenen Töpfe angepasst.", open: "In Grey to Glory öffnen", store: "Im App Store laden", android: "Android · demnächst" },
+  };
+  const lang = (navigator.language || "fr").slice(0, 2), t = T[lang] || T.en;
+  document.documentElement.lang = T[lang] ? lang : "en";
+  const $ = id => document.getElementById(id);
+  $("intro").textContent = t.intro; $("open").textContent = t.open; $("store").textContent = t.store; $("android").textContent = t.android;
+  $("open").href = "learn2paint://r" + location.hash;
+
+  async function read(hash) {
+    const b64 = hash.slice(1).replace(/-/g, "+").replace(/_/g, "/");
+    const bytes = Uint8Array.from(atob(b64 + "===".slice((b64.length + 3) % 4)), c => c.charCodeAt(0));
+    const text = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();
+    const lines = text.split("\n");
+    if (lines[0] !== "1" || lines.length < 3) throw new Error("not a scheme");
+    return { name: lines[1], author: lines[2], zones: lines.slice(3).map(l => l.split("\t")).filter(f => f.length === 3) };
+  }
+
+  read(location.hash).then(s => {
+    $("title").textContent = s.name || t.title;
+    document.title = (s.name || t.title) + " — Grey to Glory";
+    if (s.author) $("author").textContent = t.by + s.author;
+    for (const [name, color] of s.zones) {
+      const li = document.createElement("li"), sw = document.createElement("span");
+      sw.className = "scheme-swatch"; sw.style.background = /^#[0-9A-Fa-f]{6}$/.test(color) ? color : "transparent";
+      li.append(sw, document.createTextNode(name)); $("zones").append(li);
+    }
+  }).catch(() => { $("title").textContent = t.title; $("intro").textContent = t.bad; $("open").hidden = true; });
+  </script>
+</body></html>
