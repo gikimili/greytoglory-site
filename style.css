@@ -146,9 +146,6 @@ details p { padding: 0 0 1.2rem; }
   .home .row-text p:last-child { font-size: 1.2rem; max-width: 30rem; }
 }
 
-/* The hobby first: the half-grey, half-painted knight (as in the icon), and the painting steps under it. */
+/* The hobby first: the half-grey, half-painted knight, as in the icon. */
 .hero-photo { display: block; justify-self: center; width: min(100%, 26rem); height: auto; border-radius: 1.4rem; box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.55); }
-.steps { display: flex; flex-wrap: wrap; gap: 0.4rem 0; margin: clamp(2.5rem, 6vw, 4rem) 0 0; padding: 1.1rem 0; list-style: none; border-block: 1px solid var(--line); color: var(--petrol); font-family: "New York", Georgia, serif; font-size: clamp(1rem, 2.2vw, 1.25rem); }
-.steps li:not(:last-child)::after { content: "→"; margin: 0 0.8rem; color: var(--clay); font-family: system-ui, sans-serif; }
-.steps + .row { margin-top: 0; }
 @media (min-width: 64rem) { .home .hero-photo { width: min(100%, 30rem); } }
