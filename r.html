@@ -54,11 +54,24 @@
     return { name: lines[1], author: lines[2], zones: lines.slice(3).map(l => l.split("\t")).filter(f => f.length === 3) };
   }
 
-  read(location.hash).then(s => {
-    $("title").textContent = s.name || t.title;
-    document.title = (s.name || t.title) + " — Grey to Glory";
-    if (s.author) $("author").textContent = t.by + s.author;
-    for (const [name, color] of s.zones) {
+  // A link can be written by anyone: a name holding a blocked word (same list and rules as the apps,
+  // blocked-words.json, copied from data/assets) is not shown on this page.
+  const blocked = fetch("blocked-words.json").then(r => r.json()).then(j => {
+    const w = j.words.map(x => x.toLowerCase());
+    return { exact: new Set(w.filter(x => !x.endsWith("*"))), prefixes: w.filter(x => x.endsWith("*")).map(x => x.slice(0, -1)) };
+  }).catch(() => ({ exact: new Set(), prefixes: [] }));
+  const leet = { "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a", "$": "s" };
+  const offensive = (text, b) => text.toLowerCase().replace(/ß/g, "ss").normalize("NFD").replace(/\p{M}+/gu, "")
+    .replace(/[013457@$]/g, c => leet[c]).replace(/(.)\1{2,}/g, "$1").split(/[^\p{L}]+/u).filter(Boolean)
+    .some(w => b.exact.has(w) || b.prefixes.some(p => w.startsWith(p)));
+
+  Promise.all([read(location.hash), blocked]).then(([s, b]) => {
+    const name = s.name && !offensive(s.name, b) ? s.name : t.title;
+    $("title").textContent = name;
+    document.title = name + " — Grey to Glory";
+    if (s.author && !offensive(s.author, b)) $("author").textContent = t.by + s.author;
+    for (const [rawName, color] of s.zones) {
+      const name = offensive(rawName, b) ? "—" : rawName;
       const li = document.createElement("li"), sw = document.createElement("span");
       sw.className = "scheme-swatch"; sw.style.background = /^#[0-9A-Fa-f]{6}$/.test(color) ? color : "transparent";
       li.append(sw, document.createTextNode(name)); $("zones").append(li);
